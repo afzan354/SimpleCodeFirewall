@@ -163,6 +163,35 @@ function secure_upload($file)
     return true;
 }
 
+/* ============================================================
+   8. ENKRIPSI & DEKRIPSI (UNTUK ANTI-IDOR)
+   ============================================================ */
+
+$config["secret_key"] = "gantengbanget_supersecret_123"; // ganti yang lebih kuat
+$config["secret_iv"]  = "iv_ganteng123"; // ganti yang lebih kuat
+
+function encode_id($string)
+{
+    global $config;
+    $key = hash('sha256', $config["secret_key"]);
+    $iv  = substr(hash('sha256', $config["secret_iv"]), 0, 16);
+
+    $output = openssl_encrypt($string, "AES-256-CBC", $key, 0, $iv);
+    return rtrim(strtr(base64_encode($output), '+/', '-_'), '='); // URL Safe
+}
+
+function decode_id($string)
+{
+    global $config;
+    $key = hash('sha256', $config["secret_key"]);
+    $iv  = substr(hash('sha256', $config["secret_iv"]), 0, 16);
+
+    // Convert URL-safe back to normal base64
+    $string = strtr($string, '-_', '+/');
+    $string = base64_decode($string);
+
+    return openssl_decrypt($string, "AES-256-CBC", $key, 0, $iv);
+}
 
 /* ============================================================
    SISTEM AKTIF — PAGE AMAN DI BAWAH INI
