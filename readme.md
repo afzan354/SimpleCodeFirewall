@@ -212,6 +212,42 @@ Diblokir.
 
 ---
 
+---
+
+## 9. Fitur Keamanan Tambahan Lainnya (Baru)
+
+### HTTP Security Headers
+Secara otomatis akan menambahkan header keamanan (X-Frame-Options, X-XSS-Protection, dll) ke semua halaman yang meng-include file `ultimate_security.php` agar mencegah Clickjacking dan Sniffing.
+
+### Paksa Koneksi HTTPS
+Untuk memaksa visitor memakai HTTPS, panggil fungsi ini di awal file (opsional):
+```php
+force_https();
+```
+
+### Password Hashing Aman
+Untuk mendaftar / menyimpan password (memakai algoritma Bcrypt bawaan PHP yang aman):
+```php
+$hash = hash_password($_POST['password']);
+```
+
+Untuk memverifikasi saat login:
+```php
+if (verify_password($_POST['password'], $hash_dari_db)) {
+    // login sukses
+}
+```
+
+### Validasi Email
+Untuk memvalidasi apakah input dari user adalah format email yang benar:
+```php
+if (!is_valid_email($_POST['email'])) {
+    die("Format email salah!");
+}
+```
+
+---
+
 # 🏁 Final Notes
 
 Ultimate Simple Security cocok untuk:
