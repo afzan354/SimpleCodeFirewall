@@ -71,7 +71,7 @@ function validate_csrf($token)
    3. BLACKLIST IP
    ============================================================ */
 
-$ip = $_SERVER['REMOTE_ADDR'];
+$ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 
 if (file_exists($config['blacklist_file'])) {
     $blacklist = file($config['blacklist_file'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -192,6 +192,54 @@ function decode_id($string)
 
     return openssl_decrypt($string, "AES-256-CBC", $key, 0, $iv);
 }
+
+/* ============================================================
+   9. TAMBAHAN KEAMANAN LAINNYA
+   ============================================================ */
+
+// Mengatur HTTP Security Headers dasar
+function set_security_headers()
+{
+    if (!headers_sent()) {
+        header("X-Frame-Options: SAMEORIGIN");
+        header("X-XSS-Protection: 1; mode=block");
+        header("X-Content-Type-Options: nosniff");
+        header("Referrer-Policy: strict-origin-when-cross-origin");
+        // header("Strict-Transport-Security: max-age=31536000; includeSubDomains"); // Uncomment jika server sepenuhnya support HTTPS
+    }
+}
+
+// Redirect ke HTTPS
+function force_https()
+{
+    if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off") {
+        $redirect = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Location: ' . $redirect);
+        exit();
+    }
+}
+
+// Helper untuk hashing password aman (bcrypt)
+function hash_password($password)
+{
+    return password_hash($password, PASSWORD_DEFAULT);
+}
+
+// Helper verifikasi password
+function verify_password($password, $hash)
+{
+    return password_verify($password, $hash);
+}
+
+// Helper validasi email
+function is_valid_email($email)
+{
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+// Eksekusi security headers secara default
+set_security_headers();
 
 /* ============================================================
    SISTEM AKTIF — PAGE AMAN DI BAWAH INI
